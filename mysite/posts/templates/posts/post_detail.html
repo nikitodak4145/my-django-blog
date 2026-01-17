@@ -1,0 +1,22 @@
+@'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ post.title }}</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .back { display: inline-block; margin-bottom: 20px; padding: 10px; background: #007bff; color: white; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← Назад к статьям</a>
+    <h1>{{ post.title }}</h1>
+    <p><small>📅 {{ post.created_at|date:"d.m.Y H:i" }} | ID: {{ post.id }}</small></p>
+    <div style="font-size: 1.2em; line-height: 1.6;">
+        {{ post.content|linebreaks }}
+    </div>
+    <script>
+        console.log("Статья загружена: {{ post.title }}");
+    </script>
+</body>
+</html>

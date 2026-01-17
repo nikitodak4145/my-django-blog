@@ -13,3 +13,10 @@ urlpatterns = [
     # Но мы создадим его в следующем файле
     path('', views.post_list, name='post_list'),
 ]
+
+
+
+urlpatterns = [
+    path('', views.post_list, name='post_list'),  # главная
+    path('post/<int:post_id>/', views.post_detail, name='post_detail'),  # страница статьи
+]
