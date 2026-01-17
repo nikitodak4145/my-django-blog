@@ -1,0 +1,212 @@
+<!-- templates/posts/post_list.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой блог - Список статей</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .card {
+            transition: transform 0.2s;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .search-form {
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ЗАГОЛОВОК -->
+        <div class="text-center mb-4">
+            <h1 class="display-5 text-primary">📝 Мой блог</h1>
+            <p class="lead text-muted">Добро пожаловать в мой блог!</p>
+        </div>
+
+        <!-- ФОРМА ПОИСКА -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <form method="get" action="" class="search-form">
+                    <div class="input-group">
+                        <input type="text" 
+                               name="q" 
+                               class="form-control form-control-lg" 
+                               placeholder="Поиск по статьям..." 
+                               value="{{ query|default:'' }}">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            🔍 Найти
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- РЕЗУЛЬТАТЫ ПОИСКА -->
+        {% if query %}
+        <div class="alert alert-info text-center">
+            <strong>🔍 Результаты поиска:</strong> 
+            Найдено {{ posts.paginator.count }} статей по запросу "{{ query }}"
+            <a href="?page=1" class="btn btn-sm btn-outline-info ms-3">Показать все</a>
+        </div>
+        {% endif %}
+
+        <!-- СПИСОК СТАТЕЙ -->
+        {% if posts %}
+            <div class="row">
+                {% for post in posts %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text">
+                                {{ post.content|truncatewords:30|default:"Без текста" }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    📅 {{ post.created_at|date:"d.m.Y" }}
+                                </small>
+                                <span class="badge bg-secondary">
+                                    {{ forloop.counter }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ПАГИНАЦИЯ -->
+            {% if posts.paginator.num_pages > 1 %}
+            <nav aria-label="Навигация" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    
+                    <!-- ПРЕДЫДУЩАЯ СТРАНИЦА -->
+                    {% if posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ posts.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">
+                            ← Назад
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">← Назад</span>
+                    </li>
+                    {% endif %}
+
+                    <!-- НОМЕРА СТРАНИЦ -->
+                    {% for num in posts.paginator.page_range %}
+                        {% if num == posts.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- СЛЕДУЮЩАЯ СТРАНИЦА -->
+                    {% if posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ posts.next_page_number }}{% if query %}&q={{ query }}{% endif %}">
+                            Вперед →
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Вперед →</span>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+
+            <!-- ИНФОРМАЦИЯ О СТРАНИЦЕ -->
+            <p class="text-center text-muted mt-2">
+                Страница {{ posts.number }} из {{ posts.paginator.num_pages }} | 
+                Всего статей: {{ posts.paginator.count }}
+            </p>
+            {% endif %}
+
+        {% else %}
+            <!-- ЕСЛИ СТАТЕЙ НЕТ -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <span style="font-size: 4rem;">📭</span>
+                </div>
+                <h3 class="text-muted mb-3">
+                    {% if query %}
+                    По запросу "{{ query }}" ничего не найдено
+                    {% else %}
+                    Статьи пока не добавлены
+                    {% endif %}
+                </h3>
+                <p class="text-muted mb-4">
+                    {% if query %}
+                    Попробуйте изменить поисковый запрос.
+                    {% else %}
+                    Добавьте статьи через админ-панель.
+                    {% endif %}
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    {% if query %}
+                    <a href="?page=1" class="btn btn-primary">Показать все статьи</a>
+                    {% endif %}
+                    <a href="/admin" class="btn btn-outline-primary">Админ-панель</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- ФУТЕР -->
+        <footer class="mt-5 pt-4 border-top text-center">
+            <p class="text-muted">
+                Мой блог © {% now "Y" %} | 
+                Всего статей: {{ posts.paginator.count|default:"0" }} | 
+                <a href="/admin" class="text-decoration-none">Админка</a>
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- BOOTSTRAP JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- ПРОСТОЙ СКРИПТ -->
+    <script>
+        // Подсветка карточек при наведении
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.cursor = 'pointer';
+                });
+            });
+            
+            // Сохраняем поисковый запрос в localStorage
+            const searchInput = document.querySelector('input[name="q"]');
+            if (searchInput && searchInput.value) {
+                localStorage.setItem('lastSearch', searchInput.value);
+            }
+        });
+    </script>
+</body>
+</html>
