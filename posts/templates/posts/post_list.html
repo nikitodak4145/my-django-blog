@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Мой блог</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .post-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .post-title {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .post-meta {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .read-more {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .read-more:hover {
+            background: #2980b9;
+            color: white;
+        }
+        .search-box {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+        }
+        .js-test {
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #ecf0f1;
+        }
+    </style>
+    <!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container">
+      <!-- НАВИГАЦИЯ -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-journal-text"></i> Мой Блог
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">
+                        <i class="bi bi-house"></i> Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/" target="_blank">
+                        <i class="bi bi-gear"></i> Админка
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/posts/">
+                        <i class="bi bi-code-slash"></i> API
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+        <!-- ПОИСК -->
+        <div class="search-box">
+            <h4>🔍 Поиск по статьям</h4>
+            <form method="get" action="">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Введите поисковый запрос..." 
+                           value="{{ request.GET.q|default:'' }}">
+                    <button class="btn btn-primary" type="submit">Искать</button>
+                </div>
+            </form>
+            {% if request.GET.q %}
+                <p class="mt-2">
+                    Результаты поиска по запросу: "<strong>{{ request.GET.q }}</strong>"
+                    <a href="?" class="btn btn-sm btn-outline-secondary ms-2">Очистить</a>
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- СТАТЬИ -->
+      <div class="row">
+    {% for post in posts %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ post.title }}</h5>
+                <p class="card-text text-muted">
+                    <small>
+                        <i class="bi bi-calendar"></i> {{ post.created_at|date:"d.m.Y" }}
+                        <i class="bi bi-chat ms-2"></i> {{ post.comments.count }} комм.
+                    </small>
+                </p>
+                <p class="card-text">
+                    {{ post.content|truncatewords:30 }}
+                </p>
+                <a href="/post/{{ post.id }}/" class="btn btn-primary">
+                    Читать далее <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+        <!-- ПАГИНАЦИЯ -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">← Назад</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Вперёд →</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        <!-- JAVASCRIPT ТЕСТ -->
+        <div class="js-test">
+            <h4>🎯 JavaScript OOP Тест</h4>
+            <p>Проверка работы JavaScript и ООП на странице</p>
+            
+            <button onclick="testJavaScript()" class="btn btn-success me-2">
+                🚀 Запустить тест JS
+            </button>
+            
+            <button onclick="addTestPost()" class="btn btn-warning">
+                📝 Добавить тестовую статью
+            </button>
+            
+            <div id="js-result" class="mt-3 p-3 bg-white rounded"></div>
+        </div>
+
+        <!-- ПОДВАЛ -->
+        <div class="footer">
+            <p>Мой блог © {% now "Y" %} | Всего статей: {{ posts.count }} | 
+               <a href="/admin/">Админка</a> | 
+               <a href="/api/posts/">API</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ JAVASCRIPT -->
+    <script src="/static/js/blog.js"></script>
+    
+    <!-- ВСТРОЕННЫЙ JS ДЛЯ ТЕСТА -->
+    <script>
+    // ПРОСТОЙ КЛАСС ДЛЯ ТЕСТА
+    class TestBlog {
+        constructor() {
+            this.posts = [];
+            this.nextId = 1;
+            console.log("✅ TestBlog создан");
+        }
+        
+        addPost(title, text) {
+            const post = {
+                id: this.nextId,
+                title: title,
+                text: text,
+                time: new Date().toLocaleTimeString()
+            };
+            this.posts.push(post);
+            this.nextId++;
+            
+            console.log(`📝 Добавлена статья: "${title}"`);
+            return post;
+        }
+        
+        showPosts() {
+            console.log("=== Все статьи в JS ===");
+            this.posts.forEach(p => {
+                console.log(`#${p.id}: ${p.title} (${p.time})`);
+            });
+            return this.posts;
+        }
+    }
+    
+    // СОЗДАЁМ ОБЪЕКТ
+    window.testBlog = new TestBlog();
+    
+    // ФУНКЦИИ ДЛЯ КНОПОК
+    function testJavaScript() {
+        console.clear();
+        console.log("🔄 Запускаем тест JavaScript...");
+        
+        // Добавляем тестовые статьи
+        testBlog.addPost("Тестовая статья 1", "Это первая тестовая статья");
+        testBlog.addPost("Тестовая статья 2", "Это вторая тестовая статья");
+        
+        // Показываем в консоли
+        testBlog.showPosts();
+        
+        // Показываем на странице
+        const resultDiv = document.getElementById('js-result');
+        const posts = testBlog.posts;
+        
+        let html = '<h5>✅ Тест выполнен! Статьи добавлены:</h5>';
+        posts.forEach(post => {
+            html += `
+                <div class="border p-2 mb-2">
+                    <strong>${post.title}</strong><br>
+                    <small>ID: ${post.id}, Время: ${post.time}</small>
+                </div>
+            `;
+        });
+        html += `<p><em>Посмотрите также консоль (F12 → Console)</em></p>`;
+        
+        resultDiv.innerHTML = html;
+        
+        alert("✅ JavaScript работает!\n\nПосмотрите:\n1. Сообщение выше\n2. Консоль (F12 → Console)\n3. Результат ниже");
+    }
+    
+    function addTestPost() {
+        const num = Math.floor(Math.random() * 100);
+        const post = testBlog.addPost(
+            `Случайная статья #${num}`, 
+            `Текст сгенерирован в ${new Date().toLocaleTimeString()}`
+        );
+        
+        const resultDiv = document.getElementById('js-result');
+        resultDiv.innerHTML = `
+            <div class="alert alert-success">
+                <h5>✅ Статья добавлена!</h5>
+                <p><strong>${post.title}</strong></p>
+                <p><small>ID: ${post.id} | Время: ${post.time}</small></p>
+                <p>Всего статей в JS: ${testBlog.posts.length}</p>
+            </div>
+        `;
+        
+        console.log("Добавлена новая статья:", post);
+    }
+    
+    // АВТОТЕСТ ПРИ ЗАГРУЗКЕ
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("📄 Страница загружена, JavaScript работает!");
+        testBlog.addPost("Авто-статья при загрузке", "Эта статья добавлена автоматически");
+    });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -38,3 +38,12 @@ class Post(models.Model):
         ordering = ['-created_at']  # Сортировка: новые статьи сверху
         verbose_name = "Статья"  # Название в единственном числе
         verbose_name_plural = "Статьи"  # Название во множественном числе
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.CharField(max_length=100, default='Аноним')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'Комментарий от {self.author} к "{self.post.title}"'       

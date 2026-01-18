@@ -33,3 +33,23 @@ class PostAdmin(admin.ModelAdmin):
             'classes': ('collapse',)  # Можно свернуть/развернуть
         }),
     )
+
+    # posts/admin.py
+
+from .models import Comment
+
+# 2. РЕГИСТРИРУЕМ В АДМИНКЕ С НАСТРОЙКАМИ
+# @admin.register = декоратор = "оберни функцию в дополнительную логику"
+# Comment = модель которую регистрируем
+# admin.site.register(Comment) ← старый способ (просто регистрация)
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    # 3. КАК ОТОБРАЖАТЬ СПИСОК КОММЕНТАРИЕВ
+    # list_display = какие поля показывать в таблице
+    list_display = ('author', 'post', 'created_at')
+    
+    # 4. ФИЛЬТРЫ СБОКУ (ДЛЯ БЫСТРОГО ПОИСКА)
+    # list_filter = по каким полям можно фильтровать
+    # created_at = фильтр по дате (сегодня, неделя, месяц)
+    # post = фильтр по статье
+    list_filter = ('created_at', 'post')
